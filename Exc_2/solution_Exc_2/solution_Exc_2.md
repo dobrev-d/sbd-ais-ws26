@@ -113,6 +113,7 @@ LIMIT 5;
 | 50 000 | 27501822 |  3.09 sec |
 | 100 000 | 109946508 | 10.32 sec |
 | 200 000 | 439395606 | 60.94 sec |
+
 **SQL query used for this step:**
 ```sql
 CREATE TABLE people_50k  AS SELECT * FROM people_big WHERE id <= 50000;
