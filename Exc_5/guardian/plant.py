@@ -94,12 +94,22 @@ class KafkaSink:
         from confluent_kafka import Producer
         self.producer = Producer({
             "bootstrap.servers": args.bootstrap,
-            # TODO: more settings?
+            "compression.type": "lz4",
+            "acks": "all"
         })
 
     def send(self, reading):
-        # TODO: send the reading (as JSON) to Kafka: self.producer.produce(...)
-        raise NotImplementedError("KafkaSink.send() is part of your solution (Stage C1)")
+        data_bytes = json.dumps(reading).encode("utf-8")
+        
+        # Use machine_id as the key to guarantee strict per-machine ordering
+        id_bytes = reading["machine_id"].encode("utf-8")
+
+        # Produce asynchronously to the 'readings' topic
+        self.producer.produce(
+            topic="readings",
+            key=id_bytes,
+            value=data_bytes
+        )
 
     def tick(self):
         """Called once per tick, after all readings of that tick were sent."""

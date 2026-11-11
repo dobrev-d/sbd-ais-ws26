@@ -19,8 +19,8 @@ from model import BearingModel
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--name", default="det-1", help="instance name (shows up in the scoreboard)")
-ap.add_argument("--in-topic", default=None, help="TODO: the topic your gateways write to")
-ap.add_argument("--group", default=None, help="TODO: the consumer group of this detector")
+ap.add_argument("--in-topic", default="readings", help="TODO: the topic your gateways write to")
+ap.add_argument("--group", default="detectors", help="TODO: the consumer group of this detector")
 ap.add_argument("--out-topic", default="anomalies")
 ap.add_argument("--bootstrap", default="localhost:9092")
 args = ap.parse_args()
@@ -36,7 +36,8 @@ consumer = Consumer({
 })
 producer = Producer({
     "bootstrap.servers": args.bootstrap,
-    # TODO: more settings?
+    "compression.type": "lz4",
+    "acks": "all"
 })
 consumer.subscribe([args.in_topic])
 print(f"[{args.name}] {args.in_topic} -> {args.out_topic} (Ctrl+C to stop)", flush=True)
@@ -57,7 +58,10 @@ try:
         if score is not None and score >= model.threshold:
             anomalies += 1
             event = model.anomaly_event(reading, score)
-            producer.produce(args.out_topic, key=None,       # TODO: which key?
+
+            anomaly_key = reading["machine_id"].encode("utf-8")
+
+            producer.produce(args.out_topic, key=anomaly_key,       # TODO: which key?
                              value=json.dumps(event))
         producer.poll(0)
         if time.time() >= report_at:
