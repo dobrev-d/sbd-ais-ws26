@@ -1,6 +1,9 @@
 {
   "name": "fraud-connector",
   "config": {
+    "message.key.columns": "public.transactions:user_id",
+    "topic.creation.default.partitions": "6",
+    "topic.creation.default.replication.factor": "1",
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
     "database.hostname": "postgres",
     "database.port": "5432",
